@@ -38,7 +38,7 @@
             "displayName": "Run List",
             "description": "Recipe(s) to run (e.g. recipe[getting-started],recipe[other-recipe],...)",
             "defaultValue": "",
-            "allowedValues":["bld_web", "bld_db"]
+            "allowedValues":["role[bld_web]", "role[bld_db]"]
         },
         "clientRb": {
             "type": "string",
