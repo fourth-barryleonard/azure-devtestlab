@@ -92,7 +92,7 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
             "bootstrap_options": {
-                "chef_node_name": "[variables('vmName')]",
+                "chef_node_name": "[parameters('newVMName')]",
                 "chef_server_url": "[parameters('chefServerUrl')]",
                 "validation_client_name": "[parameters('validationClientName')]",
                 "node_ssl_verify_mode": "[parameters('sslVerifyMode')]",
