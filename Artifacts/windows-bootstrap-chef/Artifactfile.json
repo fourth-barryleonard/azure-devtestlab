@@ -10,12 +10,6 @@
     "iconUri": "https://raw.githubusercontent.com/Azure/azure-devtestlab/master/Artifacts/windows-bootstrap-chef/chefArtifact.png",
     "targetOsType": "Windows",
     "parameters": {
-        "chefNodeName": {
-            "type": "string",
-            "displayName": "Chef Node Name",
-            "description": "The name to assign to this VM as used by the Chef server. A node is any computer that is managed by a Chef server.",
-            "defaultValue": "[parameters('newVMName')]"
-        },
         "chefServerUrl": {
             "type": "string",
             "displayName": "Chef Server URL",
@@ -93,7 +87,6 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
             "bootstrap_options": {
-                "chef_node_name": "[parameters('chefNodeName')]",
                 "chef_server_url": "[parameters('chefServerUrl')]",
                 "validation_client_name": "[parameters('validationClientName')]",
                 "node_ssl_verify_mode": "[parameters('sslVerifyMode')]",
