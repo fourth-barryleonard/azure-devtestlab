@@ -1,0 +1,260 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "createdBy": {
+      "type": "string",
+      "defaultValue": "Barry Leonard",
+      "metadata": {
+        "description": "User creating the resource"
+      }
+    },
+    "vnet1Prefix": {
+      "type": "string",
+      "defaultValue": "10.90.100.0/16",
+      "metadata": {
+        "description": "Virtual Network Address space"
+      }
+    },
+    "vnet1Subnet1Name": {
+      "type": "string",
+      "defaultValue": "DB_Subnet",
+      "metadata": {
+        "description": "Subnet 1 name"
+      }
+    },
+    "vnet1Subnet1Prefix": {
+      "type": "string",
+      "defaultValue": "10.90.100.0/24",
+      "metadata": {
+        "description": "Subnet 1 prefix"
+      }
+    },
+    "vnet1Subnet2Name": {
+      "type": "string",
+      "defaultValue": "Web_Subnet",
+      "metadata": {
+        "description": "Subnet 2 name"
+      }
+    },
+    "vnet1Subnet2Prefix": {
+      "type": "string",
+      "defaultValue": "10.90.101.0/24",
+      "metadata": {
+        "description": "Subnet 2 prefix"
+      }
+    },
+    "dbServerType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS"
+      ]
+    },
+    "dbServerAdminUserName": {
+      "defaultValue": "infra",
+      "minLength": 1,
+      "type": "string"
+    },
+    "dbServerAdminPassword": {
+      "type": "securestring"
+    },
+    "dbServerOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-R2-Datacenter",
+        "2016-Datacenter",
+        "16.04.0-LTS"
+      ]
+    },
+    "dbServerImagePublisher": {
+      "type": "string",
+      "defaultValue": "MicrosoftWindowsServer",
+      "allowedValues": [
+        "MicrosoftWindowsServer",
+        "Canonical"
+      ]
+    },
+    "dbServerImageOffer": {
+      "type": "string",
+      "defaultValue": "WindowsServer",
+      "allowedValues": [
+        "WindowsServer",
+        "UbuntuServer"
+      ]
+    },
+    "dbServerName": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "BLDDBServer01",
+      "metadata": {
+        "description": "Database server name (must be unique)"
+      }
+    }
+  },
+  "variables": {
+    "createdby": "[parameters('createdBy')]",
+    "vnet1Prefix": "[parameters('vnet1Prefix')]",
+    "vnet1Subnet1Name": "[parameters('vnet1Subnet1Name')]",
+    "vnet1Subnet1Prefix": "[parameters('vnet1Subnet1Prefix')]",
+    "vnet1Subnet2Name": "[parameters('vnet1Subnet2Name')]",
+    "vnet1Subnet2Prefix": "[parameters('vnet1Subnet2Prefix')]",
+    "dbServerName": "[toLower(parameters('dbServerName'))]",
+    "dbServerImagePublisher": "[parameters('dbServerImagePublisher')]",
+    "dbServerImageOffer": "[parameters('dbServerImageOffer')]",
+    "dbServerOSVersion": "[parameters('dbServerOSVersion')]",
+    "dbServerOSDiskName": "DBServerOSDisk",
+    "dbServerVmSize": "Standard_D2_v2",
+    "dbServerVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'vnet1')]",
+    "dbServerSubnetRef": "[concat(variables('dbServerVnetID'), '/subnets/', variables('vnet1Subnet1Name'))]",
+    "dbServerStorageAccount": "[toLower(parameters('dbServerName'))]",
+    "dbServerStorageAccountContainerName": "vhds",
+    "dbServerNicName": "[concat(parameters('dbServerName'), 'NetworkInterface')]",
+    "dbServerPublicIPName": "[concat(parameters('dbServerName'), 'PublicIP')]",
+    "dbServerDNSName": "[toLower(parameters('dbServerName'))]"
+  },
+  "resources": [
+    {
+      "name": "vnet1",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "vnet1",
+        "createdby": "[variables('createdBy')]"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('vnet1Prefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('vnet1Subnet1Name')]",
+            "properties": {
+              "addressPrefix": "[variables('vnet1Subnet1Prefix')]"
+            }
+          },
+          {
+            "name": "[variables('vnet1Subnet2Name')]",
+            "properties": {
+              "addressPrefix": "[variables('vnet1Subnet2Prefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('dbServerStorageAccount')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-01-01",
+      "sku": {
+        "name": "[parameters('dbServerType')]"
+      },
+      "dependsOn": [],
+      "tags": {
+        "displayName": "dbServer",
+        "createdby": "[variables('createdBy')]"
+      },
+      "kind": "Storage"
+    },
+    {
+      "name": "[variables('dbServerNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', 'vnet1')]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('dbServerPublicIPName'))]"
+      ],
+      "tags": {
+        "displayName": "dbServerNic"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('dbServerSubnetRef')]"
+              },
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('dbServerPublicIPName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[parameters('dbServerName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('dbServerName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', variables('dbServerNicName'))]"
+      ],
+      "tags": {
+        "displayName": "dbServer",
+        "createdby": "[variables('createdBy')]"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('dbServerVmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('dbServerName')]",
+          "adminUsername": "[parameters('dbServerAdminUsername')]",
+          "adminPassword": "[parameters('dbServerAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('dbServerImagePublisher')]",
+            "offer": "[variables('dbServerImageOffer')]",
+            "sku": "[variables('dbServerOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "dbServerOSDisk",
+            "vhd": {
+              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('dbServerStorageAccount')), '2016-01-01').primaryEndpoints.blob, variables('dbServerStorageAccountContainerName'), '/', variables('dbServerOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('dbServerNicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "[variables('dbServerPublicIPName')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-03-30",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "dbServer"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('dbServerDnsName')]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}
