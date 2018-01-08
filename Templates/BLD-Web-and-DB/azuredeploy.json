@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "createdBy": {
@@ -272,13 +272,13 @@
         "typeHandlerVersion": "1210.12",
         "settings": {
           "bootstrap_options": {
-            "chef_server_url": "[variables('chefServer')]",
+            "chef_server_url": "[parameters('chefServer')]",
             "validation_client_name": "barrytest-validator"
           },
           "runlist": "[parameters('dbServerChefRole')]"
         },
         "protectedSettings": {
-          "validation_key": "[variables('chefValidatorKey')]"
+          "validation_key": "[parameters('chefValidatorKey')]"
         }
       }
     },
