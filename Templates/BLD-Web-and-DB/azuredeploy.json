@@ -281,13 +281,13 @@
         "typeHandlerVersion": "1210.12",
         "settings": {
           "bootstrap_options": {
-            "chef_server_url": "[variables('chefServer')]",
+            "chef_server_url": "[parameters('chefServer')]",
             "validation_client_name": "barrytest-validator"
           },
           "runlist": "[parameters('dbServerChefRole')]"
         },
         "protectedSettings": {
-          "validation_key": "[variables('chefValidatorKey')]"
+          "validation_key": "[parameters('chefValidatorKey')]"
         }
       }
     },
