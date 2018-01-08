@@ -58,7 +58,7 @@
     },
     "dbServerAdminPassword": {
       "type": "securestring",
-      "defaultValue": "[[[barryTest]]"
+      "defaultValue": "[[[barryTest]]]"
     },
     "dbServerImagePublisher": {
       "type": "string",
@@ -104,11 +104,11 @@
     },
     "chefValidatorKey": {
       "type": "securestring",
-      "defaultValue": "[[[barrytest-validator]]"
+      "defaultValue": "[[[barrytest-validator]]]"
     },
     "chefServer": {
       "type": "securestring",
-      "defaultValue": "[[[barrytest-chef-url]]"
+      "defaultValue": "[[[barrytest-chef-url]]]"
     }
   },
   "variables": {
