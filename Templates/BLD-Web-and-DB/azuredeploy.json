@@ -59,16 +59,6 @@
     "dbServerAdminPassword": {
       "type": "securestring"
     },
-    "dbServerOSVersion": {
-      "type": "string",
-      "defaultValue": "2012-R2-Datacenter",
-      "allowedValues": [
-        "2008-R2-SP1",
-        "2012-R2-Datacenter",
-        "2016-Datacenter",
-        "16.04.0-LTS"
-      ]
-    },
     "dbServerImagePublisher": {
       "type": "string",
       "defaultValue": "MicrosoftWindowsServer",
@@ -85,12 +75,46 @@
         "UbuntuServer"
       ]
     },
+    "dbServerOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-R2-Datacenter",
+        "2016-Datacenter",
+        "16.04.0-LTS"
+      ]
+    },
     "dbServerName": {
       "type": "string",
       "minLength": 1,
       "defaultValue": "BLDDBServer01",
       "metadata": {
         "description": "Database server name (must be unique)"
+      }
+    },
+    "dbServerChefRole": {
+      "type": "string",
+      "minLength": 1,
+      "defaultValue": "bld-db",
+      "metadata": {
+        "description": "Chef role"
+      }
+    },
+    "chefValidatorKey": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/a6edf9da-b31a-48ac-b34d-1a9673e0908c/resourceGroups/bldrg161391/providers/Microsoft.KeyVault/vaults/bldb70b2349"
+        },
+        "secretName": "barrytest-validator"
+      }
+    },
+    "chefServer": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/a6edf9da-b31a-48ac-b34d-1a9673e0908c/resourceGroups/bldrg161391/providers/Microsoft.KeyVault/vaults/bldb70b2349"
+        },
+        "secretName": "barrytest-chef-url"
       }
     }
   },
@@ -111,9 +135,11 @@
     "dbServerSubnetRef": "[concat(variables('dbServerVnetID'), '/subnets/', variables('vnet1Subnet1Name'))]",
     "dbServerStorageAccount": "[toLower(parameters('dbServerName'))]",
     "dbServerStorageAccountContainerName": "vhds",
-    "dbServerNicName": "[concat(parameters('dbServerName'), 'NetworkInterface')]",
-    "dbServerPublicIPName": "[concat(parameters('dbServerName'), 'PublicIP')]",
-    "dbServerDNSName": "[toLower(parameters('dbServerName'))]"
+    "dbServerNicName": "[concat(parameters('dbServerName'), 'NIC1')]",
+    "dbServerPublicIPName": "[parameters('dbServerName')]",
+    "dbServerDNSName": "[toLower(parameters('dbServerName'))]",
+    "chefValidatorKey": "[parameters('chefValidatorKey')]",
+    "chefServer": "[parameters('chefServer')]"
   },
   "resources": [
     {
@@ -236,6 +262,30 @@
               "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('dbServerNicName'))]"
             }
           ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('dbServerName'),'/', 'ChefExtension')]",
+      "apiVersion": "2016-04-30-preview",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('dbServerName'))]"
+      ],
+      "properties": {
+        "publisher": "Chef.Bootstrap.WindowsAzure",
+        "type": "ChefClient",
+        "typeHandlerVersion": "1210.12",
+        "settings": {
+          "bootstrap_options": {
+            "chef_server_url": "[variables('chefServer')]",
+            "validation_client_name": "barrytest-validator"
+          },
+          "runlist": "[parameters('dbServerChefRole')]"
+        },
+        "protectedSettings": {
+          "validation_key": "[variables('chefValidatorKey')]"
         }
       }
     },
