@@ -58,7 +58,7 @@
     },
     "dbServerAdminPassword": {
       "type": "securestring",
-      "defaultValue": "[[[infra-password]]"
+      "defaultValue": "[[[barryTest]]"
     },
     "dbServerImagePublisher": {
       "type": "string",
