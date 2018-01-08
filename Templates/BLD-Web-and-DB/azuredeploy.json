@@ -102,7 +102,6 @@
       }
     },
     "chefValidatorKey": {
-      "type": "securestring",
       "reference": {
         "keyVault": {
           "id": "/subscriptions/a6edf9da-b31a-48ac-b34d-1a9673e0908c/resourceGroups/bldrg161391/providers/Microsoft.KeyVault/vaults/bldb70b2349"
@@ -111,7 +110,6 @@
       }
     },
     "chefServer": {
-      "type": "securestring",
       "reference": {
         "keyVault": {
           "id": "/subscriptions/a6edf9da-b31a-48ac-b34d-1a9673e0908c/resourceGroups/bldrg161391/providers/Microsoft.KeyVault/vaults/bldb70b2349"
