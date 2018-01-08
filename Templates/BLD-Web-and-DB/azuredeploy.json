@@ -57,7 +57,8 @@
       "type": "string"
     },
     "dbServerAdminPassword": {
-      "type": "securestring"
+      "type": "securestring",
+      "defaultValue": "[[[infra-password]]"
     },
     "dbServerImagePublisher": {
       "type": "string",
@@ -102,20 +103,12 @@
       }
     },
     "chefValidatorKey": {
-      "reference": {
-        "keyVault": {
-          "id": "/subscriptions/a6edf9da-b31a-48ac-b34d-1a9673e0908c/resourceGroups/bldrg161391/providers/Microsoft.KeyVault/vaults/bldb70b2349"
-        },
-        "secretName": "barrytest-validator"
-      }
+      "type": "securestring",
+      "defaultValue": "[[[barrytest-validator]]"
     },
     "chefServer": {
-      "reference": {
-        "keyVault": {
-          "id": "/subscriptions/a6edf9da-b31a-48ac-b34d-1a9673e0908c/resourceGroups/bldrg161391/providers/Microsoft.KeyVault/vaults/bldb70b2349"
-        },
-        "secretName": "barrytest-chef-url"
-      }
+      "type": "securestring",
+      "secretName": "[[[barrytest-chef-url]]"
     }
   },
   "variables": {
@@ -279,13 +272,13 @@
         "typeHandlerVersion": "1210.12",
         "settings": {
           "bootstrap_options": {
-            "chef_server_url": "[parameters('chefServer')]",
+            "chef_server_url": "[variables('chefServer')]",
             "validation_client_name": "barrytest-validator"
           },
           "runlist": "[parameters('dbServerChefRole')]"
         },
         "protectedSettings": {
-          "validation_key": "[parameters('chefValidatorKey')]"
+          "validation_key": "[variables('chefValidatorKey')]"
         }
       }
     },
