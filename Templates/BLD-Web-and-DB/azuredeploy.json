@@ -108,7 +108,7 @@
     },
     "chefServer": {
       "type": "securestring",
-      "secretName": "[[[barrytest-chef-url]]"
+      "defaultValue": "[[[barrytest-chef-url]]"
     }
   },
   "variables": {
